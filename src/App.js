@@ -52,21 +52,30 @@ const average = (arr) =>
 
 // !Structural Component
 export default function App() {
+  const [movies, setMovies] = useState(tempMovieData);
+
   return (
     <>
-      <Navbar />
-      <Main />
+      <Navbar>
+        <Search />
+        <NumSearch movies={movies} />
+      </Navbar>
+      <Main>
+        <Moviebox>
+          <MovieList movies={movies} />
+        </Moviebox>
+        <MovieWatched />
+      </Main>
     </>
   );
 }
 
 // !Structural Component
-function Navbar() {
+function Navbar({ children }) {
   return (
     <nav className='nav-bar'>
       <Logo />
-      <Search />
-      <NumSearch />
+      {children}
     </nav>
   );
 }
@@ -97,27 +106,21 @@ function Search() {
 }
 
 // !Presentation Component
-function NumSearch() {
+function NumSearch({ movies }) {
   return (
     <p className='num-results'>
-      Found <strong>X</strong> results
+      Found <strong>{movies.length}</strong> results
     </p>
   );
 }
 
 // !Stractural Component
-function Main() {
-  return (
-    <main className='main'>
-      <Moviebox />
-      <MovieWatched />
-    </main>
-  );
+function Main({ children }) {
+  return <main className='main'>{children}</main>;
 }
 
 // !Stateful Component
-function Moviebox() {
-  const [movies, setMovies] = useState(tempMovieData);
+function Moviebox({ children }) {
   const [isOpen1, setIsOpen1] = useState(true);
 
   return (
@@ -128,7 +131,7 @@ function Moviebox() {
       >
         {isOpen1 ? '–' : '+'}
       </button>
-      {isOpen1 && <MovieList movies={movies} />}
+      {isOpen1 && children}
     </div>
   );
 }
