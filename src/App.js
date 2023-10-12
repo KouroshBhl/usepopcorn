@@ -53,6 +53,7 @@ const average = (arr) =>
 // !Structural Component
 export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState(tempWatchedData);
 
   return (
     <>
@@ -61,10 +62,13 @@ export default function App() {
         <NumSearch movies={movies} />
       </Navbar>
       <Main>
-        <Moviebox>
+        <MovieBox>
           <MovieList movies={movies} />
-        </Moviebox>
-        <MovieWatched />
+        </MovieBox>
+        <MovieBox>
+          <WatchedSummary watched={watched} />
+          <WatchedList watched={watched} />
+        </MovieBox>
       </Main>
     </>
   );
@@ -119,19 +123,15 @@ function Main({ children }) {
   return <main className='main'>{children}</main>;
 }
 
-// !Stateful Component
-function Moviebox({ children }) {
-  const [isOpen1, setIsOpen1] = useState(true);
+function MovieBox({ children }) {
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className='box'>
-      <button
-        className='btn-toggle'
-        onClick={() => setIsOpen1((open) => !open)}
-      >
-        {isOpen1 ? '–' : '+'}
+      <button className='btn-toggle' onClick={() => setIsOpen((open) => !open)}>
+        {isOpen ? '–' : '+'}
       </button>
-      {isOpen1 && children}
+      {isOpen && children}
     </div>
   );
 }
@@ -160,29 +160,6 @@ function MovieItem({ movie }) {
         </p>
       </div>
     </li>
-  );
-}
-
-// !Stateful Component
-function MovieWatched() {
-  const [watched, setWatched] = useState(tempWatchedData);
-  const [isOpen2, setIsOpen2] = useState(true);
-
-  return (
-    <div className='box'>
-      <button
-        className='btn-toggle'
-        onClick={() => setIsOpen2((open) => !open)}
-      >
-        {isOpen2 ? '–' : '+'}
-      </button>
-      {isOpen2 && (
-        <>
-          <WatchedSummary watched={watched} />
-          <WatchedList watched={watched} />
-        </>
-      )}
-    </div>
   );
 }
 
