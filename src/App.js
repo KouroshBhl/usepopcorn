@@ -50,6 +50,7 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
+// !Structural Component
 export default function App() {
   return (
     <>
@@ -59,6 +60,7 @@ export default function App() {
   );
 }
 
+// !Structural Component
 function Navbar() {
   return (
     <nav className='nav-bar'>
@@ -69,6 +71,7 @@ function Navbar() {
   );
 }
 
+// !Presentation Component
 function Logo() {
   return (
     <div className='logo'>
@@ -77,6 +80,8 @@ function Logo() {
     </div>
   );
 }
+
+// !Stateful Component
 function Search() {
   const [query, setQuery] = useState('');
 
@@ -91,6 +96,7 @@ function Search() {
   );
 }
 
+// !Presentation Component
 function NumSearch() {
   return (
     <p className='num-results'>
@@ -99,6 +105,7 @@ function NumSearch() {
   );
 }
 
+// !Stractural Component
 function Main() {
   return (
     <main className='main'>
@@ -108,6 +115,7 @@ function Main() {
   );
 }
 
+// !Stateful Component
 function Moviebox() {
   const [movies, setMovies] = useState(tempMovieData);
   const [isOpen1, setIsOpen1] = useState(true);
@@ -125,6 +133,7 @@ function Moviebox() {
   );
 }
 
+// !Presentational Component
 function MovieList({ movies }) {
   return (
     <ul className='list'>
@@ -135,6 +144,7 @@ function MovieList({ movies }) {
   );
 }
 
+// !Stractural Component
 function MovieItem({ movie }) {
   return (
     <li>
@@ -150,6 +160,7 @@ function MovieItem({ movie }) {
   );
 }
 
+// !Stateful Component
 function MovieWatched() {
   const [watched, setWatched] = useState(tempWatchedData);
   const [isOpen2, setIsOpen2] = useState(true);
@@ -172,6 +183,7 @@ function MovieWatched() {
   );
 }
 
+// !Stateful Component
 function WatchedSummary({ watched }) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
@@ -202,6 +214,7 @@ function WatchedSummary({ watched }) {
   );
 }
 
+// !Presentational Component
 function WatchedList({ watched }) {
   return (
     <ul className='list'>
@@ -212,6 +225,7 @@ function WatchedList({ watched }) {
   );
 }
 
+// !presenation Component
 function WatchedItem({ movie }) {
   return (
     <li>
