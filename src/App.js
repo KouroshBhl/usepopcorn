@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const tempMovieData = [
   {
@@ -50,10 +50,38 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
+const KEY = `51b156c0`;
+const API = `http://www.omdbapi.com/?apikey=`;
+const query = 'inception';
+
 // !Structural Component
 export default function App() {
-  const [movies, setMovies] = useState(tempMovieData);
-  const [watched, setWatched] = useState(tempWatchedData);
+  const [movies, setMovies] = useState([]);
+  const [watched, setWatched] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(function () {
+    async function getMovies() {
+      try {
+        setIsLoading(true);
+        const res = await fetch(`${API}${KEY}&s=${query}`);
+        if (!res.ok) throw new Error('Something went wrong!');
+
+        const data = await res.json();
+        if (data.response === 'False')
+          throw new Error('Something went wrong!!!');
+
+        setMovies(data.Search);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    getMovies();
+  }, []);
 
   return (
     <>
@@ -63,7 +91,10 @@ export default function App() {
       </Navbar>
       <Main>
         <MovieBox>
-          <MovieList movies={movies} />
+          {/* {isLoading ? <Loading /> : <MovieList movies={movies} />} */}
+          {isLoading && <Loading />}
+          {!isLoading && !error && <MovieList movies={movies} />}
+          {error && <ErrorMessage message={error} />}
         </MovieBox>
         <MovieBox>
           <WatchedSummary watched={watched} />
@@ -71,6 +102,18 @@ export default function App() {
         </MovieBox>
       </Main>
     </>
+  );
+}
+
+function Loading() {
+  return <p className='loader'>Loading...</p>;
+}
+
+function ErrorMessage({ message }) {
+  return (
+    <p className='error'>
+      <span>❌</span> {message}
+    </p>
   );
 }
 
