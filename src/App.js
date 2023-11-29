@@ -52,41 +52,49 @@ const average = (arr) =>
 
 const KEY = `51b156c0`;
 const API = `http://www.omdbapi.com/?apikey=`;
-const query = 'inception';
+// const query = 'inception';
 
 // !Structural Component
 export default function App() {
+  const [query, setQuery] = useState('');
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(function () {
-    async function getMovies() {
-      try {
-        setIsLoading(true);
-        const res = await fetch(`${API}${KEY}&s=${query}`);
-        if (!res.ok) throw new Error('Something went wrong!');
+  useEffect(
+    function () {
+      async function getMovies() {
+        try {
+          setIsLoading(true);
+          setError('');
+          const res = await fetch(`${API}${KEY}&s=${query}`);
+          if (!res.ok) throw new Error('Something went wrong!');
 
-        const data = await res.json();
-        if (data.response === 'False')
-          throw new Error('Something went wrong!!!');
+          const data = await res.json();
+          if (data.Response === 'False') throw new Error('Movie not found!');
 
-        setMovies(data.Search);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setIsLoading(false);
+          setMovies(data.Search);
+        } catch (error) {
+          setError(error.message);
+        } finally {
+          setIsLoading(false);
+        }
       }
-    }
+      if (query.length < 3) {
+        setError('Please start searching!');
+        return;
+      }
 
-    getMovies();
-  }, []);
+      getMovies();
+    },
+    [query]
+  );
 
   return (
     <>
       <Navbar>
-        <Search />
+        <Search query={query} setQuery={setQuery} />
         <NumSearch movies={movies} />
       </Navbar>
       <Main>
@@ -138,9 +146,7 @@ function Logo() {
 }
 
 // !Stateful Component
-function Search() {
-  const [query, setQuery] = useState('');
-
+function Search({ query, setQuery }) {
   return (
     <input
       className='search'
