@@ -15,7 +15,7 @@ const countStyle = {
   lineHeight: '1px',
 };
 
-const Star = ({ starLength = 5, color }) => {
+const Star = ({ starLength = 5, color = '#fff', size = 48 }) => {
   const [currentStar, setCurrentStar] = useState(null);
   const [tempStar, setTempStar] = useState(0);
 
@@ -30,6 +30,7 @@ const Star = ({ starLength = 5, color }) => {
             onHover={() => setTempStar(i + 1)}
             onOut={() => setTempStar(0)}
             color={color}
+            size={size}
           />
         ))}
       </div>
@@ -38,14 +39,14 @@ const Star = ({ starLength = 5, color }) => {
   );
 };
 
-const starStyle = {
-  cursor: 'pointer',
-  height: '48px',
-  width: '48px',
-  display: 'block',
-};
+const StarIcon = ({ onClick, full, onHover, onOut, color, size }) => {
+  const starStyle = {
+    cursor: 'pointer',
+    height: `${size}px`,
+    width: `${size}px`,
+    display: 'block',
+  };
 
-const StarIcon = ({ onClick, full, onHover, onOut, color }) => {
   return (
     <span
       role='button'

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Star from './Star';
 
 const tempMovieData = [
   {
@@ -61,6 +62,7 @@ export default function App() {
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectId, setSelectId] = useState(null);
 
   useEffect(
     function () {
@@ -101,15 +103,93 @@ export default function App() {
         <MovieBox>
           {/* {isLoading ? <Loading /> : <MovieList movies={movies} />} */}
           {isLoading && <Loading />}
-          {!isLoading && !error && <MovieList movies={movies} />}
+          {!isLoading && !error && (
+            <MovieList movies={movies} setSelectId={setSelectId} />
+          )}
           {error && <ErrorMessage message={error} />}
         </MovieBox>
         <MovieBox>
-          <WatchedSummary watched={watched} />
-          <WatchedList watched={watched} />
+          {selectId ? (
+            <MovieDetails selectId={selectId} />
+          ) : (
+            <>
+              <WatchedSummary watched={watched} />
+              <WatchedList watched={watched} />
+            </>
+          )}
         </MovieBox>
       </Main>
     </>
+  );
+}
+
+function MovieDetails({ selectId }) {
+  const [selectedMovie, setSelectedMovie] = useState({});
+
+  const {
+    Title: title,
+    Year: year,
+    Poster: poster,
+    Runtime: runtime,
+    imdbRating,
+    Plot: plot,
+    Released: released,
+    Actors: actors,
+    Director: director,
+    Genre: genre,
+  } = selectedMovie;
+
+  useEffect(() => {
+    async function onSearchHandler() {
+      try {
+        const res = await fetch(`${API}${KEY}&i=${selectId}`);
+        const data = await res.json();
+        console.log(data);
+        setSelectedMovie(data);
+      } catch (error) {
+        console.log(error.message);
+      }
+    }
+
+    onSearchHandler();
+  }, [selectId]);
+
+  return (
+    <div className='details'>
+      <header>
+        <button className='btn-back'>&larr;</button>
+        <img src={poster} alt={`Poster of ${title} movie`} />
+        <div className='details-overview'>
+          <h2>{title}</h2>
+          <p>
+            {released} &bull; {runtime}
+          </p>
+          <p>{genre}</p>
+          <p>
+            <span>⭐️</span>
+            {imdbRating} IMDb rating
+          </p>
+        </div>
+      </header>
+
+      {/* <p>{avgRating}</p> */}
+
+      <section>
+        <div className='rating'>
+          <Star color='#facc15' starLength={10} size={24} />
+
+          <button className='btn-add'>+ Add to list</button>
+          <p>
+            You rated with movie <span>⭐️</span>
+          </p>
+        </div>
+        <p>
+          <em>{plot}</em>
+        </p>
+        <p>Starring {actors}</p>
+        <p>Directed by {director}</p>
+      </section>
+    </div>
   );
 }
 
@@ -186,20 +266,24 @@ function MovieBox({ children }) {
 }
 
 // !Presentational Component
-function MovieList({ movies }) {
+function MovieList({ movies, setSelectId }) {
   return (
-    <ul className='list'>
+    <ul className='list list-movies'>
       {movies?.map((movie) => (
-        <MovieItem movie={movie} key={movie.imdbID} />
+        <MovieItem
+          movie={movie}
+          key={movie.imdbID}
+          onClick={() => setSelectId(movie.imdbID)}
+        />
       ))}
     </ul>
   );
 }
 
 // !Stractural Component
-function MovieItem({ movie }) {
+function MovieItem({ movie, onClick }) {
   return (
-    <li>
+    <li onClick={onClick}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>
