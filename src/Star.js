@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const containerStyle = {
   display: 'flex',
   gap: '13px',
-  alignItemsx: 'center',
+  alignItems: 'center',
 };
 
 const starContainer = {
@@ -15,9 +15,20 @@ const countStyle = {
   lineHeight: '1px',
 };
 
-const Star = ({ starLength = 5, color = '#fff', size = 48 }) => {
-  const [currentStar, setCurrentStar] = useState(null);
+const Star = ({
+  starLength = 5,
+  color = '#fff',
+  size = 48,
+  onSetRating,
+  defaultRating = 0,
+}) => {
+  const [currentStar, setCurrentStar] = useState(defaultRating);
   const [tempStar, setTempStar] = useState(0);
+
+  function handleRating(currentStar) {
+    setCurrentStar(currentStar);
+    onSetRating(currentStar);
+  }
 
   return (
     <div style={containerStyle}>
@@ -25,7 +36,7 @@ const Star = ({ starLength = 5, color = '#fff', size = 48 }) => {
         {Array.from({ length: starLength }, (_, i) => (
           <StarIcon
             key={i}
-            onClick={() => setCurrentStar(i + 1)}
+            onRate={() => handleRating(i + 1)}
             full={tempStar ? tempStar >= i + 1 : currentStar >= i + 1}
             onHover={() => setTempStar(i + 1)}
             onOut={() => setTempStar(0)}
@@ -39,7 +50,7 @@ const Star = ({ starLength = 5, color = '#fff', size = 48 }) => {
   );
 };
 
-const StarIcon = ({ onClick, full, onHover, onOut, color, size }) => {
+const StarIcon = ({ onRate, full, onHover, onOut, color, size }) => {
   const starStyle = {
     cursor: 'pointer',
     height: `${size}px`,
@@ -51,7 +62,7 @@ const StarIcon = ({ onClick, full, onHover, onOut, color, size }) => {
     <span
       role='button'
       style={starStyle}
-      onClick={onClick}
+      onClick={onRate}
       onMouseEnter={onHover}
       onMouseLeave={onOut}
     >

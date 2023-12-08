@@ -57,12 +57,16 @@ const API = `http://www.omdbapi.com/?apikey=`;
 
 // !Structural Component
 export default function App() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState('test');
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectId, setSelectId] = useState(null);
+
+  function handleCloseMovie() {
+    setSelectId(null);
+  }
 
   useEffect(
     function () {
@@ -110,7 +114,12 @@ export default function App() {
         </MovieBox>
         <MovieBox>
           {selectId ? (
-            <MovieDetails selectId={selectId} />
+            <MovieDetails
+              selectId={selectId}
+              setSelectId={setSelectId}
+              setWatched={setWatched}
+              onCloseMovie={handleCloseMovie}
+            />
           ) : (
             <>
               <WatchedSummary watched={watched} />
@@ -123,8 +132,10 @@ export default function App() {
   );
 }
 
-function MovieDetails({ selectId }) {
+function MovieDetails({ selectId, setWatched, onCloseMovie }) {
   const [selectedMovie, setSelectedMovie] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [userRating, setUserRating] = useState(0);
 
   const {
     Title: title,
@@ -141,55 +152,89 @@ function MovieDetails({ selectId }) {
 
   useEffect(() => {
     async function onSearchHandler() {
+      setIsLoading(true);
       try {
         const res = await fetch(`${API}${KEY}&i=${selectId}`);
         const data = await res.json();
-        console.log(data);
         setSelectedMovie(data);
       } catch (error) {
         console.log(error.message);
+      } finally {
+        setIsLoading(false);
       }
     }
 
     onSearchHandler();
   }, [selectId]);
 
+  function handleAddToWatched() {
+    const addMovieToList = {
+      title,
+      imdbID: selectId,
+      year,
+      imdbRating: Number(imdbRating),
+      runtime: Number(runtime.split(' ').at(0)),
+      poster,
+      userRating,
+    };
+
+    setWatched((watched) => [...watched, addMovieToList]);
+    onCloseMovie();
+  }
+
   return (
-    <div className='details'>
-      <header>
-        <button className='btn-back'>&larr;</button>
-        <img src={poster} alt={`Poster of ${title} movie`} />
-        <div className='details-overview'>
-          <h2>{title}</h2>
-          <p>
-            {released} &bull; {runtime}
-          </p>
-          <p>{genre}</p>
-          <p>
-            <span>⭐️</span>
-            {imdbRating} IMDb rating
-          </p>
+    <>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <div className='details'>
+          <header>
+            <button className='btn-back' onClick={onCloseMovie}>
+              &larr;
+            </button>
+            <img src={poster} alt={`Poster of ${title} movie`} />
+            <div className='details-overview'>
+              <h2>{title}</h2>
+              <p>
+                {released} &bull; {runtime}
+              </p>
+              <p>{genre}</p>
+              <p>
+                <span>⭐️</span>
+                {imdbRating} IMDb rating
+              </p>
+            </div>
+          </header>
+
+          {/* <p>{avgRating}</p> */}
+
+          <section>
+            <div className='rating'>
+              <Star
+                color='#facc15'
+                starLength={10}
+                size={24}
+                onSetRating={setUserRating}
+              />
+
+              {userRating > 0 && (
+                <button className='btn-add' onClick={handleAddToWatched}>
+                  + Add to list
+                </button>
+              )}
+              {/* <p>
+                You rated with movie <span>⭐️</span>
+              </p> */}
+            </div>
+            <p>
+              <em>{plot}</em>
+            </p>
+            <p>Starring {actors}</p>
+            <p>Directed by {director}</p>
+          </section>
         </div>
-      </header>
-
-      {/* <p>{avgRating}</p> */}
-
-      <section>
-        <div className='rating'>
-          <Star color='#facc15' starLength={10} size={24} />
-
-          <button className='btn-add'>+ Add to list</button>
-          <p>
-            You rated with movie <span>⭐️</span>
-          </p>
-        </div>
-        <p>
-          <em>{plot}</em>
-        </p>
-        <p>Starring {actors}</p>
-        <p>Directed by {director}</p>
-      </section>
-    </div>
+      )}
+    </>
   );
 }
 
@@ -298,9 +343,9 @@ function MovieItem({ movie, onClick }) {
 
 // !Stateful Component
 function WatchedSummary({ watched }) {
-  const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
-  const avgUserRating = average(watched.map((movie) => movie.userRating));
-  const avgRuntime = average(watched.map((movie) => movie.runtime));
+  // const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
+  // const avgUserRating = average(watched.map((movie) => movie.userRating));
+  // const avgRuntime = average(watched.map((movie) => movie.runtime));
 
   return (
     <div className='summary'>
@@ -312,15 +357,15 @@ function WatchedSummary({ watched }) {
         </p>
         <p>
           <span>⭐️</span>
-          <span>{avgImdbRating}</span>
+          <span>{watched.avgImdbRating}</span>
         </p>
         <p>
           <span>🌟</span>
-          <span>{avgUserRating}</span>
+          <span>{watched.avgUserRating}</span>
         </p>
         <p>
           <span>⏳</span>
-          <span>{avgRuntime} min</span>
+          <span>{watched.avgRuntime} min</span>
         </p>
       </div>
     </div>
@@ -342,8 +387,8 @@ function WatchedList({ watched }) {
 function WatchedItem({ movie }) {
   return (
     <li>
-      <img src={movie.Poster} alt={`${movie.Title} poster`} />
-      <h3>{movie.Title}</h3>
+      <img src={movie.poster} alt={`${movie.title} poster`} />
+      <h3>{movie.title}</h3>
       <div>
         <p>
           <span>⭐️</span>
@@ -355,7 +400,7 @@ function WatchedItem({ movie }) {
         </p>
         <p>
           <span>⏳</span>
-          <span>{movie.runtime} min</span>
+          <span>{movie.runtime}min</span>
         </p>
       </div>
     </li>
