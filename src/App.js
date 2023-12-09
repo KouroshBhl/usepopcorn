@@ -53,7 +53,6 @@ const average = (arr) =>
 
 const KEY = `51b156c0`;
 const API = `http://www.omdbapi.com/?apikey=`;
-// const query = 'inception';
 
 // !Structural Component
 export default function App() {
@@ -74,11 +73,15 @@ export default function App() {
 
   useEffect(
     function () {
+      const controller = new AbortController();
+
       async function getMovies() {
         try {
           setIsLoading(true);
           setError('');
-          const res = await fetch(`${API}${KEY}&s=${query}`);
+          const res = await fetch(`${API}${KEY}&s=${query}`, {
+            signal: controller.signal,
+          });
           if (!res.ok) throw new Error('Something went wrong!');
 
           const data = await res.json();
@@ -86,7 +89,7 @@ export default function App() {
 
           setMovies(data.Search);
         } catch (error) {
-          setError(error.message);
+          if (error.name !== 'AbortError') setError(error.message);
         } finally {
           setIsLoading(false);
         }
@@ -97,6 +100,10 @@ export default function App() {
       }
 
       getMovies();
+
+      return function () {
+        controller.abort();
+      };
     },
     [query]
   );
@@ -109,7 +116,6 @@ export default function App() {
       </Navbar>
       <Main>
         <MovieBox>
-          {/* {isLoading ? <Loading /> : <MovieList movies={movies} />} */}
           {isLoading && <Loading />}
           {!isLoading && !error && (
             <MovieList movies={movies} setSelectId={setSelectId} />
@@ -179,6 +185,15 @@ function MovieDetails({ selectId, setWatched, onCloseMovie, watched }) {
 
     onSearchHandler();
   }, [selectId]);
+
+  useEffect(() => {
+    if (!title) return;
+    document.title = `Movie | ${title}`;
+
+    return function () {
+      document.title = 'usePopcorn';
+    };
+  }, [title]);
 
   function handleAddToWatched() {
     const addMovieToList = {
