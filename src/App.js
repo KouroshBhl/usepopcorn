@@ -195,6 +195,21 @@ function MovieDetails({ selectId, setWatched, onCloseMovie, watched }) {
     };
   }, [title]);
 
+  useEffect(() => {
+    function callback(e) {
+      if (e.code === 'Escape') {
+        onCloseMovie();
+        console.log('closed');
+      }
+    }
+
+    document.addEventListener('keydown', callback);
+
+    return function () {
+      document.removeEventListener('keydown', callback);
+    };
+  }, [onCloseMovie]);
+
   function handleAddToWatched() {
     const addMovieToList = {
       title,
